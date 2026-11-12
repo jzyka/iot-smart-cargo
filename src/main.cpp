@@ -5,21 +5,18 @@
 #include <LiquidCrystal_I2C.h>
 #include <DHT.h>
 #include <esp_system.h>
-
-// ======================= CONFIG: EDIT THESE 3 LINES =======================
 const char *WIFI_SSID = "exile";                // must be 2.4 GHz
 const char *WIFI_PASS = "bovendigoel";
-const char *MQTT_HOST = "10.122.243.121";       // your Mac's IP (ipconfig getifaddr en0)
+const char *MQTT_HOST = "10.122.243.121";       
 // ==========================================================================
 
-const bool BUZZER_ENABLED = true;   // set false to silence the buzzer hardware (e.g. when debugging power)
+const bool BUZZER_ENABLED = true;   
 
 const uint16_t MQTT_PORT   = 1883;
 const char *TOPIC_DATA     = "cargo/data";     // ESP32 -> backend (10 Hz JSON)
 const char *TOPIC_STATUS   = "cargo/status";   // "online" / "offline"
 const char *TOPIC_CMD      = "cargo/cmd";      // backend -> ESP32: recal | mute | unmute
 
-// ---- Pins (match the expansion-board wiring) ----
 const int PIN_SDA0 = 21, PIN_SCL0 = 22;   // LCD (I2C bus 0)
 const int PIN_SDA1 = 16, PIN_SCL1 = 17;   // MPU6050 (I2C bus 1)
 const int PIN_DHT = 4;
@@ -92,7 +89,6 @@ bool readMPU() {
     raw[i] = (int16_t)((hi << 8) | lo);
   }
   ax = raw[0] * ACC_SCALE; ay = raw[1] * ACC_SCALE; az = raw[2] * ACC_SCALE;
-  // raw[3] is the chip temperature, ignored
   gx = raw[4] * GYRO_SCALE; gy = raw[5] * GYRO_SCALE; gz = raw[6] * GYRO_SCALE;
   mag = sqrtf(ax * ax + ay * ay + az * az);
   return true;
@@ -126,7 +122,6 @@ void onMessage(char *topic, byte *payload, unsigned int len) {
   else if (m == "unmute") muted = false;
 }
 
-// The alarm rules keep running even if WiFi/MQTT is down.
 void maintainConnection() {
   unsigned long now = millis();
   if (WiFi.status() != WL_CONNECTED) {
@@ -180,8 +175,6 @@ void setup() {
   delay(300);
   Serial.printf("\nreset reason=%d\n", (int)esp_reset_reason());
 
-  // WiFi first, with reduced TX power (same order as the working scan test):
-  // mode -> tx power -> begin
   WiFi.mode(WIFI_STA);
   WiFi.setTxPower(WIFI_POWER_8_5dBm);
   WiFi.setAutoReconnect(true);
